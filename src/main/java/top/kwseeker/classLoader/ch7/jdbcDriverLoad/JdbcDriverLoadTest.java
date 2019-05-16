@@ -20,7 +20,7 @@ public class JdbcDriverLoadTest {
             Connection conn = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/mybatis_learn?characterEncoding=utf8",
                     "root",
-                    "112358flzt9t");
+                    "123456");
             String querySql = "Select * from t_blog";
             ResultSet resultSet = conn.createStatement().executeQuery(querySql);
             resultSet.last();
