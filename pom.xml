@@ -12,6 +12,7 @@
       <module>jvm-classloader</module>
       <module>jvm-usage</module>
       <module>jvm-debug-demo</module>
+        <module>jvm-reference</module>
     </modules>
 
     <name>jvm-principle</name>
