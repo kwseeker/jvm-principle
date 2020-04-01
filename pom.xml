@@ -13,6 +13,7 @@
       <module>jvm-usage</module>
       <module>jvm-debug-demo</module>
         <module>jvm-reference</module>
+        <module>jvm-jit</module>
     </modules>
 
     <name>jvm-principle</name>

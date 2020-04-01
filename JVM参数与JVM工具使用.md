@@ -4,14 +4,19 @@
 
 [HotSpot JVM参数官方文档](https://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html)
 
-```shell
-#查看所有jvm -XX参数
-java -XX:+PrintFlagsFinal
+主要分为三类：标准参数、-X非标准参数、-XX非标准参数。
+
+命令行查看参数说明
+```sh
+java -help  #查看标准参数
+java -X     #查看非标准参数
+java -XX:+PrintFlagsFinal   #查看所有-XX参数
+jinfo -flags <pid>          #查看正在运行的java进程启用的参数
+jinfo -flag <premeter> <pid>   #查看正在运行java进程某个参数的值
 ```
 
-![JVM常用参数](./imgs/JVM常用参数.png)
-
 + 常用配置参数
+![JVM常用参数](./imgs/JVM常用参数.png)
 
   | 参数 | 功能 |
   |:----|:--------|
