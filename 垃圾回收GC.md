@@ -52,12 +52,12 @@ Java 的自动内存管理主要是针对++对象内存的回收和对象内存�
 2.2）每次Minor GC后from survivor中的对象的age都会加1；  
 2.3）如果from survivor中对象age还小于15，但是from survivor空间占用已经达到了50%（由*TargetSurvivorRatio指定）以上则会按年龄从小到大进行累加，当加入某个年龄段后，累加和超过survivor区域*TargetSurvivorRatio的值的时候，就将这个年龄段往上的年龄的对象直接移到老年代。  
 3）当from survivor区中的对象的age等于15（默认为15，四个字节最大值），则对象会被移到老年代存储。  
-4）当老年代空间逐渐被对象占满之后则会触发 Major GC（Full GC），对老年代对象进行回收， Major GC 一般都会触发 Minor GC（但是不是绝对触发）。Major GC 效率一般闭 Minor GC 效率低10倍以上，所以经常触发STW（Stop The World）即可能会卡顿。  
+4）当老年代空间逐渐被对象占满之后则会触发 Major GC（Full GC），对老年代对象进行回收， Major GC 一般都会触发 Minor GC（但是不是绝对触发）。Major GC 效率一般比 Minor GC 效率低10倍以上，所以经常触发STW（Stop The World）即可能会卡顿。  
 
 PS：  
 **大对象**：需要大量连续内存空间的对象（比如字符串、数组），使用-XX:PretenureSizeThreshold定义大对象的大小边界（此参数需要配合Serial、PartNew等收集器使用），将大对象直接在老年代分配可以避免在新生代发生大量的内存复制。
 
-#### 为何将“永久代”替换为“元空间（方法区）”
+#### 为何将方法区从“永久代”替换为“元空间”
 
 整个永久代有一个 JVM 本身设置固定大小上限，无法进行调整，而元空间使用的是直接内存，受本机可用内存的限制，虽然元空间仍旧可能溢出，但是比原来出现的几率会更小。
 
@@ -149,7 +149,7 @@ PS：
 
 ### 如何手动触发GC回收
 
-```
+```java
 //下面两种写法是完全一样的
 System.gc()
 Runtime.getRuntime().gc()

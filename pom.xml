@@ -14,6 +14,7 @@
       <module>jvm-debug-demo</module>
         <module>jvm-reference</module>
         <module>jvm-jit</module>
+        <module>jvm-runtimedata</module>
     </modules>
 
     <name>jvm-principle</name>
