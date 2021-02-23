@@ -16,7 +16,7 @@ jinfo -flag <premeter> <pid>   #查看正在运行java进程某个参数的值
 ```
 
 + 常用配置参数
-![JVM常用参数](./imgs/JVM常用参数.png)
+![JVM常用参数](imgs/JVM常用参数.png)
 
   | 参数 | 功能 |
   |:----|:--------|
