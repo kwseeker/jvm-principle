@@ -12,14 +12,15 @@ public class ObjectStackAllocTest {
 
     public static void main(String[] args) throws InterruptedException {
         long a1 = System.currentTimeMillis();
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 1000000; i++) {         //对象虽然没有逃逸，但是创建的对象太多，栈空间不足，最终还是会将放不下的对象放到堆里面
+        //for (int i = 0; i < 10; i++) {            //如果调小的话，栈可以放下，就不会占用堆空间
             alloc();
         }
         long a2 = System.currentTimeMillis();
         System.out.println("cost " + (a2 - a1) + " ms");
 
         // 为了方便查看堆内存中对象个数，线程sleep
-        Thread.sleep(100000);
+        Thread.sleep(1000000);
     }
 
     private static void alloc() {
