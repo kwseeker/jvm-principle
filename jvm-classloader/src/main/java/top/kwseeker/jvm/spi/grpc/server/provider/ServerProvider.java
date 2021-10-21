@@ -1,13 +1,13 @@
-package top.kwseeker.classloader.grpcServerProvider;
+package top.kwseeker.jvm.spi.grpc.server.provider;
 
-import top.kwseeker.classloader.grpcServerProvider.ServiceProviders.PriorityAccessor;
+import top.kwseeker.jvm.spi.grpc.server.provider.ServiceProviders.PriorityAccessor;
 
 /**
  *
  */
 public abstract class ServerProvider {
 
-    private static final ServerProvider provider = (ServerProvider) ServiceProviders.load(
+    private static final ServerProvider provider = ServiceProviders.load(
             ServerProvider.class,
             ServerProvider.class.getClassLoader(),
             new PriorityAccessor<ServerProvider>() {

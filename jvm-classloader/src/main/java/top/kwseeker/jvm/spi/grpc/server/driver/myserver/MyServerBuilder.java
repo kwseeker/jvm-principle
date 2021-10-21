@@ -1,8 +1,8 @@
-package top.kwseeker.spiDriver.myserver;
+package top.kwseeker.jvm.spi.grpc.server.driver.myserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.kwseeker.spiDriver.builder.AbstractServerImplBuilder;
+import top.kwseeker.jvm.spi.grpc.server.driver.AbstractServerImplBuilder;
 
 public class MyServerBuilder extends AbstractServerImplBuilder<MyServerBuilder> {
 

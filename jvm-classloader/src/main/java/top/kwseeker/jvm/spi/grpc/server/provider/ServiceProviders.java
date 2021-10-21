@@ -1,4 +1,4 @@
-package top.kwseeker.classloader.grpcServerProvider;
+package top.kwseeker.jvm.spi.grpc.server.provider;
 
 import java.util.*;
 

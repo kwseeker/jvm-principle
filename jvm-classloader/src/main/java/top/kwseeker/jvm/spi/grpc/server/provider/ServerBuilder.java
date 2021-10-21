@@ -1,7 +1,7 @@
-package top.kwseeker.classloader.grpcServerProvider;
+package top.kwseeker.jvm.spi.grpc.server.provider;
 
-import top.kwseeker.classloader.grpcServer.Server;
-import top.kwseeker.classloader.grpcServer.ServerServiceDefinition;
+import top.kwseeker.jvm.spi.grpc.server.Server;
+import top.kwseeker.jvm.spi.grpc.server.ServerServiceDefinition;
 
 public abstract class ServerBuilder<T extends ServerBuilder<T>> {
 

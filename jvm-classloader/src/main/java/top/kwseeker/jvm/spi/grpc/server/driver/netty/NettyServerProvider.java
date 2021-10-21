@@ -1,6 +1,6 @@
-package top.kwseeker.spiDriver.netty;
+package top.kwseeker.jvm.spi.grpc.server.driver.netty;
 
-import top.kwseeker.classloader.grpcServerProvider.ServerProvider;
+import top.kwseeker.jvm.spi.grpc.server.provider.ServerProvider;
 
 public class NettyServerProvider extends ServerProvider {
 

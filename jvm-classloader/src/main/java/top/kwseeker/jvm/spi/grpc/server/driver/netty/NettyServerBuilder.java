@@ -1,8 +1,8 @@
-package top.kwseeker.spiDriver.netty;
+package top.kwseeker.jvm.spi.grpc.server.driver.netty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.kwseeker.spiDriver.builder.AbstractServerImplBuilder;
+import top.kwseeker.jvm.spi.grpc.server.driver.AbstractServerImplBuilder;
 
 /**
  * 这个类用于构造Netty服务端的实例

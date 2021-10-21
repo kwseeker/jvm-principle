@@ -1,11 +1,11 @@
-package top.kwseeker.spiDriver.builder;
+package top.kwseeker.jvm.spi.grpc.server.driver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.kwseeker.classloader.grpcServer.Server;
-import top.kwseeker.classloader.grpcServer.ServerImpl;
-import top.kwseeker.classloader.grpcServer.ServerServiceDefinition;
-import top.kwseeker.classloader.grpcServerProvider.ServerBuilder;
+import top.kwseeker.jvm.spi.grpc.server.Server;
+import top.kwseeker.jvm.spi.grpc.server.ServerImpl;
+import top.kwseeker.jvm.spi.grpc.server.ServerServiceDefinition;
+import top.kwseeker.jvm.spi.grpc.server.provider.ServerBuilder;
 
 /**
  * 创建Server的通用方法

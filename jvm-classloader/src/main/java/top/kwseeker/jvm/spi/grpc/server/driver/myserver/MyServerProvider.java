@@ -1,6 +1,6 @@
-package top.kwseeker.spiDriver.myserver;
+package top.kwseeker.jvm.spi.grpc.server.driver.myserver;
 
-import top.kwseeker.classloader.grpcServerProvider.ServerProvider;
+import top.kwseeker.jvm.spi.grpc.server.provider.ServerProvider;
 
 /**
  * 具体的
