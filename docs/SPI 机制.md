@@ -50,9 +50,45 @@ SPI 用于本地服务发现和服务加载， “基于接口的编程＋策略
 
 ## 2 实现原理
 
- 研究`ServiceLoader.load()`怎么实现的，以及有哪些高级用法（如指定加载优先级等）。
+ 研究`ServiceLoader.load()`怎么实现的，以及有哪些高级用法（Java官方源码并没有高级用法，像加载优先级什么的是第三方框架在ServiceLoader基础上拓展的）。 
 
+在`MusicPlayMainTest.class` 将`ServiceLoader`的`load()`使用面向过程的方式写了一遍，方便理解它一步步地都做了什么。
 
+实现很简单：
+
+> 读取目标接口类的SPI配置文件解析，拿到所有实现类的全路径名，然后使用类加载器加载。加载之后再缓存一下。
+>
+> 对外也仅提供了迭代器。在遍历的时候才加载。
+
+核心代码：
+
+```java
+//获取类加载器
+ClassLoader cl = Thread.currentThread().getContextClassLoader();
+ClassLoader loader = (cl == null) ? ClassLoader.getSystemClassLoader() : cl;
+
+//后面的操作是在通过迭代器迭代时才会真正解析文件加载类。
+
+//读取SPI文件到Enumeration<URL>
+String spiConfigFilePath =  "META-INF/services/" + service.getName();
+Enumeration<URL> configs = loader == null ? 
+    ClassLoader.getSystemResources(spiConfigFilePath) :
+	loader.getResources(spiConfigFilePath);
+
+//解析文件每一行获取实现类的全路径名
+parseLine();
+
+//类加载
+Class<?> c = Class.forName(cn, false, loader);
+if (!service.isAssignableFrom(c))   //是否是IMusic的子类（翻译是：是否可以从c转换为service）
+    System.out.println("Provider " + cn  + " not a subtype");
+IMusic p = service.cast(c.newInstance());
+
+//spi定义的类装载后缓存在LinkedHashMap容器中
+LinkedHashMap<String, IMusic> providers = new LinkedHashMap<>();
+//添加一下缓存
+providers.put(cn, p);
+```
 
 
 
