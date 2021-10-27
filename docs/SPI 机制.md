@@ -50,6 +50,8 @@ SPI 用于本地服务发现和服务加载， “基于接口的编程＋策略
 
 ## 2 实现原理
 
+### 2.1 ServiceLoader.load() 工作原理
+
  研究`ServiceLoader.load()`怎么实现的，以及有哪些高级用法（Java官方源码并没有高级用法，像加载优先级什么的是第三方框架在ServiceLoader基础上拓展的）。 
 
 在`MusicPlayMainTest.class` 将`ServiceLoader`的`load()`使用面向过程的方式写了一遍，方便理解它一步步地都做了什么。
@@ -58,7 +60,7 @@ SPI 用于本地服务发现和服务加载， “基于接口的编程＋策略
 
 > 读取目标接口类的SPI配置文件解析，拿到所有实现类的全路径名，然后使用类加载器加载。加载之后再缓存一下。
 >
-> 对外也仅提供了迭代器。在遍历的时候才加载。
+> 对外也仅提供了迭代器。在遍历的时候才加载（通过迭代器hasNext()的时候才会加载）。
 
 核心代码：
 
@@ -89,6 +91,41 @@ LinkedHashMap<String, IMusic> providers = new LinkedHashMap<>();
 //添加一下缓存
 providers.put(cn, p);
 ```
+
+### 2.2 GRPC ServiceProviders对 ServiceLoader的封装
+
+由上面的分析知道Java官方的ServiceLoader只是提供了迭代器接口，且实现类是懒加载的(通过迭代器hasNext()的时候才会加载)。
+
+而业务代码中更常用的需求是提供了一堆实现后调load()方法给返回一个最优的实例对象。为此GRPC对ServiceLoader进行了封装产生一个ServiceProviders类。
+
+ServiceProviders工作原理
+
+1）使用ServiceLoader加载接口类的所有实现类
+
+首先说下资源获取的委派流程：
+
+```java
+//委派流程
+// 1 BootstrapClassLoader 从 jdk基本包中查找资源
+URLClassPath urlClassPath = getBootstrapClassPath();
+Resource res = urlClassPath.getResource(fullName);
+// 2 ExtClassLoader 从 ext 包中查找资源
+ClassLoader extCl = cl.getParent();
+URL url3 = ((URLClassLoader) extCl).findResource(fullName);
+// 3 AppClassLoader 从 当前项目根目录查找资源
+URL url4 = ((URLClassLoader) cl).findResource(fullName);
+// 4 某自定义Class 从 class所在package查找资源
+//URL url5 = MyClass.class.getResource(fullName);
+URL url6 = String.class.getResource("Object.class");	//String类是BootstrapClassLoader加载的，
+														//最终通过getBootstrapResource(name)从/lib下的基本包中查找
+														//返回：jar:file:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar!/java/lang/Object.class
+```
+
+2）加载实现类后，遍历读取到ArrayList
+
+3）然后再按优先级进行排序
+
+4）获取第一个，即优先级最高的那个
 
 
 
