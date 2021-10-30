@@ -11,7 +11,7 @@ public class NettyServerProvider extends ServerProvider {
 
     @Override
     protected int priority() {
-        return 5;
+        return 1;
     }
 
     @Override

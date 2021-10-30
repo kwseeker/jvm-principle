@@ -6,14 +6,14 @@ import sun.misc.URLClassPath;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ServiceLoader;
+import java.util.*;
 
 import static sun.misc.Launcher.getBootstrapClassPath;
 
 public class ServiceProvidersTest {
 
     @Test
-    public void testLoadClassByPriority() {
+    public void testLoadClassByPriority() throws Exception {
         //这里先尝试从AppClassLoader开始双亲委派，查找"top.kwseeker.jvm.spi.grpc.server.provider.ServerProvider"
         // configs = loader.getResources(fullName);
         Iterable<ServerProvider> iter = ServiceLoader.load(ServerProvider.class, ServerProvider.class.getClassLoader());
@@ -25,10 +25,23 @@ public class ServiceProvidersTest {
         }
 
         //加载实现类后，遍历读取到ArrayList
+        List<ServerProvider> providers = new ArrayList<>();
+        //for (ServerProvider provider : iter) {
+        //
+        //}
+        Iterator<ServerProvider> iterator = iter.iterator();
+        while (iterator.hasNext()) {
+            providers.add(iterator.next());
+        }
+        if (providers.size() <= 0) {
+            throw new Exception("没有可用的实现");
+        }
 
-        //然后再按优先级进行排序
+        //然后再按优先级进行排序, 默认从小到大排序，reverseOrder是反序排序（从大到小）
+        Collections.sort(providers, Collections.reverseOrder(Comparator.comparingInt(ServerProvider::priority)));
 
         //获取第一个，即优先级最高的那个
+        ServerProvider bestProvider = providers.get(0);
     }
 
     /**

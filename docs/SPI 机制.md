@@ -34,6 +34,10 @@ SPI 用于本地服务发现和服务加载， “基于接口的编程＋策略
 
   抽离自开源项目jvm-sandbox，介绍jvm-sandbox怎么使用spi装载可插拔的增强模块的。
 
++ **NIO**
+
+  根据操作系统类型加载多路复用实现（不同的系统实现不一样，依赖OS底层实现）。
+
 + **其他**
 
   比如 slf4j 、Spring、Dubbo 中有大量的使用，看网文吧。
@@ -100,6 +104,8 @@ providers.put(cn, p);
 
 ServiceProviders工作原理
 
+参考：`ServiceProvidersTest`。
+
 1）使用ServiceLoader加载接口类的所有实现类
 
 首先说下资源获取的委派流程：
@@ -123,9 +129,13 @@ URL url6 = String.class.getResource("Object.class");	//String类是BootstrapClas
 
 2）加载实现类后，遍历读取到ArrayList
 
-3）然后再按优先级进行排序
+3）然后再按优先级(从大到小)进行排序
 
 4）获取第一个，即优先级最高的那个
+
+### 2.3 JVM-Sandbox SPI应用
+
+
 
 
 
