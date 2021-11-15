@@ -48,8 +48,9 @@ jinfo -flag <premeter> <pid>   #查看正在运行java进程某个参数的值
   | -XX:+PrintGCTimeStamps | 输出GC的时间戳（以JVM启动到当期的总时长的时间戳形式）|
   | -XX:+PrintGCDateStamps | 输出GC的时间戳（以日期的形式，如 2013-05-04T21:53:59.234+0800）|
   | -XX:+PrintHeapAtGC | 在进行GC的前后打印出堆的信息 |
-  | -verbose:gc |
+  | -verbose:gc ||
   | -XX:+PrintReferenceGC | 打印年轻代各个引用的数量以及时长 |
+  | -XX:+TraceClassLoading | 程序运行时输出类加载过程信息 |
 
 
 ## JVM调试工具

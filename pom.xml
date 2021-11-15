@@ -15,6 +15,7 @@
         <module>jvm-reference</module>
         <module>jvm-jit</module>
         <module>jvm-runtimedata</module>
+        <module>performance-tuning</module>
         <module>jvm-optimization</module>
     </modules>
 
