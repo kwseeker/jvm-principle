@@ -135,6 +135,8 @@ URL url6 = String.class.getResource("Object.class");	//String类是BootstrapClas
 
 ### 2.3 JVM-Sandbox SPI应用
 
+这里分析jvm-sandbox是怎么借助SPI可插拔式地装载插桩模块的。
+
 
 
 
