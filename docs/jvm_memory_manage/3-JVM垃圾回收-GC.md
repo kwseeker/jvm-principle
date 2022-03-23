@@ -1,12 +1,6 @@
-# 垃圾回收GC
+# JVM垃圾回收
 
-具体参考Oracle文档：
-
-[Java虚拟机规范](https://docs.oracle.com/javase/specs/jvms/se8/html/)  
-[Oracel Hotspot docs](https://www.oracle.com/technetwork/java/javase/tech/index-jsp-136373.html)  
-
-
-## 需要掌握
+目标：
 
 + 内存分配流程？
 
@@ -20,7 +14,30 @@
 
 + Java垃圾收集方法？
 
-## 内存分配担保
+具体参考Oracle文档：
+
++ [Java虚拟机规范](https://docs.oracle.com/javase/specs/jvms/se8/html/) 
++ [Oracel Hotspot docs](https://www.oracle.com/technetwork/java/javase/tech/index-jsp-136373.html)  
+
+
+
+## Java对象生命周期
+
+注意区分**Java类的生命周期**：加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）。其中验证、准备、解析三个部分又统称为连接（Linking）。
+
+**对象的生命周期**大致可以分为7个阶段：
+
++ **创建阶段**（Created）
++ **应用阶段**（Using）
++ **不可视阶段**（Invisible）
++ **不可达阶段**（Unreachable）
++ **可收集阶段**（Collected）
++ **终结阶段**（Finalized）
++ **对象空间重新分配**（Deallocated）
+
+
+
+## 内存分配&担保机制
 
 解决年轻代空间不足（young GC后还是内存不足），无法为对象分配空间，但是老年代内存还很富余的情况。
 
@@ -102,6 +119,8 @@ PS：
   为什么这些对象可以作为GCRoot，个人认为应该从类生命周期理解，Root肯定是某个生命周期最先被创建起来的一批对象，从线程或进程的角度看，是静态变量、常量引用的对象，从代码块（帧）的角度看是初始的局部变量和JNI引用的对象。
 
 ### Java中四种引用
+
+详细参考 《Java_Reference.md》
 
 根据对引用对象内存回收的限制程度区分：
 
