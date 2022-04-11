@@ -1,25 +1,22 @@
 # JVM类加载代码流程
 
-示例代码：
+从`JVM启动进入到Java入口LauncherHelper`到`加载主类（Main-Class）`的代码流程图参考`jvm_class_load_process.drawio`。
 
-```java
-public static void main(String[] args) {
-    new A();
-}
-```
+目标：
 
-如上示例，要研究的问题：
++ 关于类加载时机
 
-+ new A() 是如何触发类加载的？
-+ class A类加载流程
-  + 类查找
-  + 类加载
++ 类加载的两个关键流程：类定义资源查找、类加载。
+
++ 懒加载实现原理
 
 
 
-## 1 new A() 触发类加载
+## 关于类加载时机
 
-**触发类加载的时机**（参考《深入理解Java虚拟机7.2章节》）：
+类加载时机有虚拟机自行决定，Java 规范并没有严格限制，但是在类初始化阶段，类加载一定是完成了的，所以只能判断在类初始化阶段类加载完成，具体何时加载要看虚拟机如何实现。
+
+**类初始化时机**（参考《深入理解Java虚拟机7.2章节》）：
 
 + 创建对象
 
@@ -41,17 +38,13 @@ public static void main(String[] args) {
 
 + 动态语言支持
 
-**到底是怎么触发的**：即为何new A() 之后会先跳到`AppClassLoader`的`loadClass`方法？
-
-这个是具体的JVM实现的，待续 ... 
 
 
+## 类加载流程
 
-## 2 类加载流程
+这里不管双亲委派，只看类的资源查找和加载。
 
-这里不管双亲委派，只看类的查找和加载。
-
-### 2.1 并行加载
+### 并行加载
 
 源码中有看到一个并行加载的概念。显示如果当前 `ClassLoader` 有注册到 `ParallelLoaders`，则会实例化一个 `parallelLockMap = new ConcurrentHashMap<>();`
 
@@ -100,7 +93,7 @@ sun.misc
         ClassLoader.registerAsParallelCapable();
 ```
 
-### 2.2 类class字节码查找
+### 类class字节码查找
 
 实例中的class A是由`AppClassLoader`加载的，看下具体代码流程：
 
@@ -189,13 +182,21 @@ protected final Class<?> defineClass(String name, byte[] b, int off, int len,
 
 3）读取class文件为byte[] 交给 `navtive` 方法 `defineClass1` 加载。
 
-### 2.3 native 方法加载类
+### native 方法加载类
 
 ```java
 Class<?> c = defineClass1(name, b, off, len, protectionDomain, source);
 ```
 
 由具体的JVM实现，待续 ...
+
+
+
+## 懒加载原理
+
+比如`Main$main()`中`User a = new User();`在执行到这行代码才会加载User类，是如何触发加载的（构造器中触发？有什么前置切面逻辑？看下Java构造器原理）？
+
+TODO
 
 
 
