@@ -20,25 +20,25 @@ public class top.kwseeker.jvm.debug.App {
        1: istore_1                          // 为第1个局部变量在局部变量表分配空间，将操作数(即上面的int类型值1)出栈存入第1个局部变量, istore_<n> 指将操作数栈中数存入第n个局部变量；所以a=1包含两条JVM指令
        2: iconst_2                          // 将int类型常量2压入操作数栈
        3: istore_2                          // 为第2个局部变量分配空间，将操作数(即上面的int类型值2)出栈存入第2个局部变量
-       4: aload_0                           // 从局部变量0（第0个局部变量，即this）中装载引用类型值
-       5: iload_1                           // 从局部变量1中装载int类型值
-       6: iload_2                           // 从局部变量2中装载int类型值
+       4: aload_0                           // 从局部变量0（第0个局部变量，即this）中装载引用类型值到操作数栈
+       5: iload_1                           // 从局部变量1中装载int类型值到操作数栈
+       6: iload_2                           // 从局部变量2中装载int类型值到操作数栈
        7: invokevirtual #2                  // Method sum:(II)I 调用对象的实现方法（进入到sum方法栈帧） #2 是常量池中第二个值 CONSTANT_Methodref_info
       10: bipush        100                 // 将一个8位带符号整数压入操作数栈
-      12: imul                              // 操作数栈出栈两个值，执行int类型乘法
-      13: ireturn
+      12: imul                              // 操作数栈出栈两个值，执行int类型乘法, 将结果压入操作数栈
+      13: ireturn                           // 将结果从操作数栈出栈，返回结果（int类型的数据）到main()方法的操作数栈, main方法中 “int result = app.compute();” 将结果从操作数出栈又写入局部变量表result的变量槽中
 
   public static void main(java.lang.String[]);
     Code:
-       0: new           #3                  // class top/kwseeker/jvm/debug/App
-       3: dup
-       4: invokespecial #4                  // Method "<init>":()V
-       7: astore_1
-       8: aload_1
+       0: new           #3                  // class top/kwseeker/jvm/debug/App 创建一个新对象()
+       3: dup                               // 复制栈顶部一个字长内容()
+       4: invokespecial #4                  // Method "<init>":()V 根据编译时类型来调用实例方法，这里是构造方法
+       7: astore_1                          // 将引用类型或returnAddress类型值存入局部变量
+       8: aload_1                           // 从局部变量中装载引用类型值
        9: invokevirtual #5                  // Method compute:()I
-      12: istore_2
+      12: istore_2                          //
       13: getstatic     #6                  // Field java/lang/System.out:Ljava/io/PrintStream;
-      16: iload_2
+      16: iload_2                           //
       17: invokevirtual #7                  // Method java/io/PrintStream.println:(I)V
-      20: return
+      20: return                            //
 }
