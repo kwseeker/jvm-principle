@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ParseFile400M {
+public class ParseFile400MTest {
 
     public static void main(String[] args) {
         List<Map<String, String>> lst = new ArrayList<>();
