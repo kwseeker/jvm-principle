@@ -49,10 +49,6 @@ GC是针对堆和方法区。
 + YGC空间不足时会将对象存放进老年代，若老年代的空间也不够的话，也会触发Full GC（比如大对象进入老年代）;
 + 元空间空间不足时，也会触发Full GC。
 
-> Young GC也会触发STW。为何 Young GC 比 Full GC 效率一般高10倍以上？
->
-> why?
-
 ### GC 存活判定方法
 
 #### 引用计数法
@@ -81,6 +77,14 @@ GCRoot对象都是选用非堆内存中的对象，能作为根的都是些始�
 + **反映Java虚拟机内部情况的JMXBean、 JVMTI中注册的回调、 本地代码缓存等**
 
 > 上面内容来自《深入理解Java虚拟机》，但是感觉说法有误，GC Root 应该是对象引用（对象指针）而不是指向的对象（有些书籍说是对象指针）。
+
+垃圾回收会触发**STW**(在获取根节点这步时会暂停用户线程)，虽然可达性分析算法耗时最长的查找引用链的过程已经可以做到和用户线程一起并发，但根节点枚举的获取还必须是要在一个能保证一致性的快照中才能进行。（应该就是类似并发加锁阻塞，收集垃圾对象的时候如果业务线程对象的引用关系还在变化，很可能出现错误）。
+
+现在所有垃圾收集器（包括YoungGC收集器）都会触发STW。
+
+##### 安全点 & 安全区域
+
+
 
 ##### 引用类型
 
@@ -171,15 +175,17 @@ Runtime.getRuntime().gc()
 
 参考：《深入理解JVM》3.5垃圾收集器
 
-![HotSpot垃圾收集器](imgs/HotSpot垃圾收集器.png)
+年轻代和老年代垃圾收集器可搭配使用关系：
+
+<img src="../imgs/HotSpot垃圾收集器.png" alt="HotSpot垃圾收集器" style="zoom:50%;" />
 
 GC回收器是回收算法的具体的实现。
 
-![GC收集器](imgs/GC收集器.png)
+![GC收集器](../imgs/GC收集器.png)
 
 ### 新生代垃圾收集器：
 
-+ Serial （-XX:+UseSerialGC）
++ **Serial** （-XX:+UseSerialGC）
 
   垃圾收集方式：串行方式（单线程）
 
@@ -187,51 +193,120 @@ GC回收器是回收算法的具体的实现。
 
   会暂停所有工作线程，导致STW。
 
-  ```
-  -XX:+UseSerialGC
-  ```
++ **Parallel Scanvenge** [并行回收] （-XX:+UseParallelGC）
 
-+ PartNew （-XX:+UseParNewGc）
-
+  Serial的多线程版本，复制算法，仍然会引起STW。
   
+  Java8默认新生代垃圾收集器。
+  
+  着重**提高CPU吞吐量**，吞吐量就是 CPU 中用于运行用户代码的时间与 CPU 总消耗时间的比值。Parallel Scavenge 收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量。
+  
+  在注重吞吐量以及 CPU资源的场合，都可以优先考虑 Parallel Scavenge收集器和Parallel Old收集器。
+  
+  > **吞吐量**：单位时间内处理任务的数量（不关注每个任务的处理时间）；
+  >
+  > CMS等收集器更多的是关注用户线程的停顿时间（**响应速度**）。
+  
++ **PartNew** （-XX:+UseParNewGc）
 
-  Serial的多线程版本，仍然会引起STW。
+  ParNew收集器其实跟Parallel收集器很类似，区别主要在于它可以和CMS收集器配合使用。
 
-+ Parallel Scanvenge （-XX:+UseParallelGC）
-
-  着重提高CPU吞吐量，吞吐量就是 CPU 中用于运行用户代码的时间与 CPU 总消耗时间的比值。Parallel Scavenge 收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量。
+  是许多运行在Server模式下的虚拟机的首要选择。
 
 > 新生代垃圾收集器都是使用的复制算法，因为新生代垃圾回收很频繁，需要保证回收性能。
 
 ### 老年代垃圾收集器：
 
-+ Serial old
++ **Serial old**
 
-+ Parallel old （-XX:-UseParallelOldGC）
+  Serial收集器的老年代版本，它同样是一个单线程收集器。
 
-+ **CMS**（-XX:+UseConcMarkSweepGC）
+  它主要有两大用途：一种用途是在JDK1.5 以及以前的版本中与Parallel Scavenge收集器搭配使用，另一种用途是作为CMS收集器的后备方案。
 
-  CMS(并发标记清除)以获取最短回收停顿时间为目标，注重用户体验。
++ **Parallel old** （-XX:-UseParallelOldGC）
+
+  Parallel Old收集器是Parallel Scavenge收集器的老年代版本。使用多线程和“标记-整理”算法。在注重吞吐量以及 CPU资源的场合，都可以优先考虑 Parallel Scavenge收集器和Parallel Old收集器(JDK8默认的新生代和老年代收集器)。
+
++ **CMS** [并发标记清除]（-XX:+UseConcMarkSweepGC）
+
+  CMS以获取最短回收停顿时间(**响应速度**)为目标，注重用户体验。
 
   CMS（Concurrent Mark Sweep）收集器是 HotSpot 虚拟机第一款真正意义上的并发收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作。
 
-  **CMS处理过程有七个步骤**：
-  1. 初始标记(CMS-initial-mark) ,会导致stw；
-  2. 并发标记(CMS-concurrent-mark)，与用户线程同时运行；
-  3. 预清理（CMS-concurrent-preclean），与用户线程同时运行；
-  4. 可被终止的预清理（CMS-concurrent-abortable-preclean） 与用户线程同时运行；
-  5. 重新标记(CMS-remark) ，会导致stw；
-  6. 并发清除(CMS-concurrent-sweep)，与用户线程同时运行；
-  7. 并发重置状态等待下次CMS的触发(CMS-concurrent-reset)，与用户线程同时运行；
-
-  ![CMS并发标记清理](imgs/CMS并发标记清除.png)
-
-  主要优点：并发收集、低停顿。  
-  但是它有下面三个明显的缺点：  
+  > 说“基本上”是因为还是有些GC阶段，用户线程是被阻塞的（如：初始标记阶段、重新标记阶段，但也可以通过参数设置与用户线程并行，看后面JVM参数）；但是其他GC阶段可以与用户线程并发执行；不像前面的收集器GC时用户线程一定被阻塞。
   
-  + 对 CPU 资源敏感；
-  +	无法处理浮动垃圾；（下一次回收）
-  + 它使用的回收算法-“标记-清除”算法会导致收集结束时会有大量空间碎片产生（不做整理 -XX:CMSFullGCsBeforeCompaction=n 多少次之后做压缩）。
+  **CMS处理过程有五（七）个步骤**：
+  
+  1. **初始标记**(CMS-initial-mark) 
+  
+     暂停所有其他线程(**STW**)；并记录下gc roots直接能引用的对象，速度很快。
+  
+  2. **并发标记**(CMS-concurrent-mark)
+  
+     与用户线程同时运行；
+  
+     从GC Roots的直接关联对象开始遍历整个对象图的过程， 这个过程耗时较长但 是不需要停顿用户线程，可以与垃圾收集线程一起并发运行。因为用户程序继续运行，可能会有导致已经标记过的对象状态发生改变。
+  
+  3. 预清理（CMS-concurrent-preclean）
+  
+     与用户线程同时运行。
+  
+  4. 可被终止的预清理（CMS-concurrent-abortable-preclean）
+  
+     与用户线程同时运行。
+  
+  5. **重新标记**(CMS-remark) 
+  
+     暂停所有其他线程(**STW**)；
+  
+     重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短。主要用到**三色标记**里的**增量更新算法**做重新标记。
+  
+  6. **并发清除**(CMS-concurrent-sweep)
+  
+     与用户线程同时运行；
+  
+     同时GC线程开始对未标记的区域做清扫。这个阶段如果有新增对象会被标记为黑色不做任何处理(见下面三色标记算法详解)。
+  
+  7. **并发重置**(CMS-concurrent-reset)
+  
+     重置本次GC过程中的标记数据。
+  
+  ![CMS并发标记清理](../imgs/CMS并发标记清除.png)
+  
+  ​	 上图中间的分界线是**安全点（SafePoint）**。
+  
+  **主要优点**：并发收集、低停顿。  
+  
+  但是它有下面三个明显的**缺点**：  
+  
+    + **对 CPU 资源敏感**；
+  
+    + **无法处理浮动垃圾**(在并发标记和并发清理阶段又产生垃圾，这种浮动垃圾只能等到下一次gc再清理了)；
+  
+    + 它使用的回收算法-“标记-清除”算法会导致收集结束时**会有大量空间碎片产生**；
+  
+      但是可以通过参数- XX:+UseCMSCompactAtFullCollection可以让jvm在执行完标记清除后再做整理；
+      或者不做整理 -XX:CMSFullGCsBeforeCompaction=n 指定多少次FullGC之后做压缩。
+  
+  + 执行过程中的不确定性，会存在上一次垃圾回收还没执行完，然后垃圾回收又被触发的情况，特别是在并 发标记和并发清理阶段会出现，一边回收，系统一边运行，也许没回收完就再次触发full gc，也就是"concurrent mode failure"，此时会进入stop the world，用serial old垃圾收集器来回收。
+  
+  **CMS JVM参数**：
+  
+  ```shell
+  -XX:+UseConcMarkSweepGC：	启用cms
+  -XX:ConcGCThreads：	并发的GC线程数
+  -XX:+UseCMSCompactAtFullCollection：	FullGC之后做压缩整理（减少碎片）
+  -XX:CMSFullGCsBeforeCompaction：		多少次FullGC之后压缩一次，默认是0，代表每次FullGC后都会压缩一 
+  -XX:CMSInitiatingOccupancyFraction: 	当老年代使用达到该比例时会触发FullGC（默认是92，这是百分比）
+  -XX:+UseCMSInitiatingOccupancyOnly：	只使用设定的回收阈值(-XX:CMSInitiatingOccupancyFraction设 定的值)，如果不指定，JVM仅在第一次使用设定值，后续则会自动调整
+  -XX:+CMSScavengeBeforeRemark：		在CMS GC前启动一次minor gc，目的在于减少老年代对年轻代的引 用，降低CMS GC的标记阶段时的开销，一般CMS的GC耗时 80%都在标记阶段
+  -XX:+CMSParallellnitialMarkEnabled：		表示在初始标记的时候多线程执行，缩短STW
+  -XX:+CMSParallelRemarkEnabled：		在重新标记的时候多线程执行，缩短STW;
+  ```
+  
+  **三色标记算法**（CMS & G1 都是使用的这种垃圾回收算法）
+  
+  
 
 ### **G1**（垃圾优先回收）
 
