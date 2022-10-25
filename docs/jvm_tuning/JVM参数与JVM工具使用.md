@@ -282,3 +282,6 @@ java.lang.OutOfMemoryError: Java heap space
 ### jstatd（JVM的jstat守护进程）
 
 ### jconsole（监视与管理）
+
+### sa-jdi （hotspot debugger：HSDB）
+

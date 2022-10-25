@@ -1,5 +1,8 @@
-package top.kwseeker.jvm.runtime;
+package top.kwseeker.jvm.constantpool;
 
+/**
+ * 字符串常量池测试
+ */
 public class StringConstPoolTest {
 
     private static String getString() {
@@ -42,6 +45,7 @@ public class StringConstPoolTest {
         String s5 = "a";
         String s6 = "abc";
         String s7 = s5 + "bc";                                  //new “abc” 立即更新到常量池,发现常量池已经有“abc”,intern()返回常量池中“abc”地址
+        System.out.println(s6 == s7);
         System.out.println(s6 == s7.intern());      //true
 
         String c = "world";
