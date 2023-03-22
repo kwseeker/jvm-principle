@@ -283,5 +283,13 @@ java.lang.OutOfMemoryError: Java heap space
 
 ### jconsole（监视与管理）
 
+### [jcmd](https://download.java.net/java/early_access/panama/docs/specs/man/jcmd.html)
+
+常用参数：
+
++ **VM.native_memory**
+
+  需要先开启[Native Memory Tracking](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html), 使用`-XX:NativeMemoryTracking=summary`或`-XX:NativeMemoryTracking=detail`参数。
+
 ### sa-jdi （hotspot debugger：HSDB）
 

@@ -9,6 +9,7 @@ import org.openjdk.jol.info.ClassLayout;
  *      bool UseCompressedOops                        := true                                {lp64_product}
  *  -XX:+UseCompressedClassPointers 默认开启的压缩对象头里的类型指针 Klass Pointer (只压缩对象头中的类型指针)
  *      bool UseCompressedClassPointers               := true                                {lp64_product}
+ *  -XX:+CompactFields (默认是开启插入的)
  *
  * @link https://github.com/openjdk/jol jol-samples 里面提供了28个示例
  */
@@ -52,18 +53,77 @@ public class JOLObjectMemorySizeTest {
         //      0     4                    (object header)                           01 00 00 00 (00000001 00000000 00000000 00000000) (1)
         //      4     4                    (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)
         //      8     4                    (object header)                           99 cb 00 f8 (10011001 11001011 00000000 11111000) (-134165607)
-        //     12     4                int A.id                                      0
-
+        //     12     4                int A.id                                      0                      //字段重排规则: 参考：https://www.finclip.com/news/f/46724.html
+                                                                                                            //因为默认开启了 -XX:CompactFields 导致id 插入到了这里
         //     16     8               long A.c                                       0                      //可以看到居然和代码出现的位置不一样，其实是JVM自动做了字段重排为了减小内存间隙
-        //     24     1               byte A.b                                       0                      //字段重排规则：8->4->2->1，还是8字节对齐 TODO: 字段重排详细规则？
+        //     24     1               byte A.b                                       0
         //     25     3                    (alignment/padding gap)
         //     28     4   java.lang.String A.name                                    null
         //     32     4   java.lang.Object A.o                                       null
         //     36     4                    (loss due to the next object alignment)
         //Instance size: 40 bytes
         //Space losses: 3 bytes internal + 4 bytes external = 7 bytes total
+
+        //-XX:-CompactFields 关闭插入后的对象内存布局
+
+        //top.kwseeker.jvm.runtime.JOLObjectMemorySizeTest$A object internals:
+        // OFFSET  SIZE               TYPE DESCRIPTION                               VALUE
+        //      0     4                    (object header)                           01 00 00 00 (00000001 00000000 00000000 00000000) (1)
+        //      4     4                    (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)
+        //      8     4                    (object header)                           d7 cb 00 f8 (11010111 11001011 00000000 11111000) (-134165545)
+        //     12     4                    (alignment/padding gap)
+        //     16     8               long A.c                                       0
+        //     24     4                int A.id                                      0
+        //     28     1               byte A.b                                       0
+        //     29     3                    (alignment/padding gap)
+        //     32     4   java.lang.String A.name                                    null
+        //     36     4   java.lang.Object A.o                                       null
+        //Instance size: 40 bytes
+        //Space losses: 7 bytes internal + 0 bytes external = 7 bytes total
         ClassLayout layout2 = ClassLayout.parseInstance(new A());
         System.out.println(layout2.toPrintable());
+
+        //全部默认JVM参数
+        //top.kwseeker.jvm.runtime.JOLObjectMemorySizeTest$B object internals:
+        // OFFSET  SIZE               TYPE DESCRIPTION                               VALUE
+        //      0     4                    (object header)                           01 00 00 00 (00000001 00000000 00000000 00000000) (1)
+        //      4     4                    (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)
+        //      8     4                    (object header)                           16 cc 00 f8 (00010110 11001100 00000000 11111000) (-134165482)
+        //     12     4                int A.id                                      0
+        //     16     8               long A.c                                       0
+        //     24     1               byte A.b                                       0
+        //     25     3                    (alignment/padding gap)
+        //     28     4   java.lang.String A.name                                    null
+        //     32     4   java.lang.Object A.o                                       null
+        //     36     2              short B.age                                     0
+        //     38     1               byte B.gender                                  0
+        //     39     1                    (alignment/padding gap)
+        //     40     4   java.lang.String B.address                                 null
+        //     44     4                    (loss due to the next object alignment)
+        //Instance size: 48 bytes
+        //Space losses: 4 bytes internal + 4 bytes external = 8 bytes total
+
+        //-XX:-CompactFields 关闭插入后的对象内存布局
+        //top.kwseeker.jvm.runtime.JOLObjectMemorySizeTest$B object internals:
+        // OFFSET  SIZE               TYPE DESCRIPTION                               VALUE
+        //      0     4                    (object header)                           01 00 00 00 (00000001 00000000 00000000 00000000) (1)
+        //      4     4                    (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)
+        //      8     4                    (object header)                           16 cc 00 f8 (00010110 11001100 00000000 11111000) (-134165482)
+        //     12     4                    (alignment/padding gap)
+        //     16     8               long A.c                                       0
+        //     24     4                int A.id                                      0
+        //     28     1               byte A.b                                       0
+        //     29     3                    (alignment/padding gap)
+        //     32     4   java.lang.String A.name                                    null
+        //     36     4   java.lang.Object A.o                                       null
+        //     40     2              short B.age                                     0
+        //     42     1               byte B.gender                                  0
+        //     43     1                    (alignment/padding gap)
+        //     44     4   java.lang.String B.address                                 null
+        //Instance size: 48 bytes
+        //Space losses: 8 bytes internal + 0 bytes external = 8 bytes total
+        ClassLayout layout3 = ClassLayout.parseInstance(new B());
+        System.out.println(layout3.toPrintable());
     }
 
     public static class A {
@@ -74,5 +134,11 @@ public class JOLObjectMemorySizeTest {
         byte b;         //1B
         Object o;       //4B 如果关闭压缩-XX:-UseCompressedOops，则占用8B
         long c;         //8B
+    }
+
+    public static class B extends A {
+        String address;
+        byte gender;
+        short age;
     }
 }
