@@ -17,6 +17,7 @@
       <module>jvm-runtimedata</module>
       <module>performance-tuning</module>
       <module>jvm-optimization</module>
+      <module>sugar</module>
     </modules>
 
     <name>jvm-principle</name>
