@@ -10,13 +10,14 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
       <module>jvm-classloader</module>
-      <module>jvm-usage</module>
       <module>jvm-debug-demo</module>
-      <module>jvm-reference</module>
       <module>jvm-jit</module>
-      <module>jvm-runtimedata</module>
-      <module>performance-tuning</module>
       <module>jvm-optimization</module>
+      <module>jvm-reference</module>
+      <module>jvm-runtimedata</module>
+      <module>jvm-tools</module>
+      <module>jvm-usage</module>
+      <module>performance-tuning</module>
       <module>sugar</module>
     </modules>
 
